@@ -16,7 +16,7 @@ jobs:
           node-version: '20.x'
       - name: Install deps
         working-directory: frontend
-        run: npm ci
+        run: npm ci || npm install
       - name: Cypress run
         uses: cypress-io/github-action@v6
         with:
