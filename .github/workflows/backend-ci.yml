@@ -1,0 +1,43 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+      - name: Run unit tests
+        run: go test ./...
+      - name: Build
+        run: go build -o app
+      - name: Start server
+        run: |
+          nohup ./app &
+          echo $! > ../server.pid
+      - name: Wait for health endpoint
+        run: |
+          for i in {1..60}; do
+            curl -sSf http://localhost:8080/api/health && exit 0
+            sleep 1
+          done
+          echo "Server did not start in time" && exit 1
+      - name: Install Newman
+        run: npm install -g newman
+      - name: Run Postman collection with Newman
+        working-directory: .
+        run: newman run ../postman/collection.json -e ../postman/env.json
+      - name: Stop server
+        if: always()
+        run: |
+          kill $(cat ../server.pid) || true
