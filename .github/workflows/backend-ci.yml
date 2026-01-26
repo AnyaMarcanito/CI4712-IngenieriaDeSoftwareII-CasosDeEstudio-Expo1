@@ -35,7 +35,6 @@ jobs:
       - name: Install Newman
         run: npm install -g newman
       - name: Run Postman collection with Newman
-        working-directory: .
         run: newman run ../postman/collection.json -e ../postman/env.json
       - name: Stop server
         if: always()
