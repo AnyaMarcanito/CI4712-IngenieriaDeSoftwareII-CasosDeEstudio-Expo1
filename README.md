@@ -1,4 +1,4 @@
-# CI4712-IngenieriaDeSoftwareII-Proyecto
+# CI4712-IngenieriaDeSoftwareII-CasosDeEstudio-Expo1
 
 Preparación del ambiente y CI con GitHub Actions para React, Go, Jest, Cypress y Postman.
 
