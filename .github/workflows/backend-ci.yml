@@ -25,10 +25,10 @@ jobs:
         run: |
           nohup ./app &
           echo $! > ../server.pid
-      - name: Wait for health endpoint
+      - name: Wait for tasks endpoint
         run: |
           for i in {1..60}; do
-            curl -sSf http://localhost:8080/api/health && exit 0
+            curl -sSf http://localhost:8080/api/tasks && exit 0
             sleep 1
           done
           echo "Server did not start in time" && exit 1
