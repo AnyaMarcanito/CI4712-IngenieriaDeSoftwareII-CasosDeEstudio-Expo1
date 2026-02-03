@@ -1,19 +1,21 @@
-.PHONY: backend backend-test backend-run frontend-install frontend-dev frontend-build frontend-test dev
+.PHONY: init dev clean backend-test frontend-install frontend-test frontend-e2e
 
-backend:
-	cd backend && go run .
-
-backend-test:
-	cd backend && go test ./...
-
-frontend-install:
+# 1. Preparar el entorno (Solo se corre la primera vez)
+init:
+	docker-compose up -d
+	cd backend && go mod tidy
 	cd frontend && npm install
 
-frontend-dev:
-	cd frontend && npm run dev
+# 2. Modo Desarrollo (Levanta todo)
+# Usamos el puerto 5435 para Postgres y 8080 para Go
+dev:
+	docker-compose up -d
+	@echo "Lanzando Backend y Frontend..."
+	(cd backend && go run cmd/api/main.go) & (cd frontend && npm run dev)
 
-frontend-build:
-	cd frontend && npm run build
+# 3. Pruebas de Calidad
+backend-test:
+	cd backend && go test ./...
 
 frontend-test:
 	cd frontend && npm run test
@@ -21,10 +23,7 @@ frontend-test:
 frontend-e2e:
 	cd frontend && npm run test:e2e
 
-dev:
-	@echo "Starting backend on :8080..."
-	cd backend && go run . & \
-	BACK_PID=$$!; \
-	echo "Starting frontend dev on :5173"; \
-	cd frontend && npm run dev; \
-	kill $$BACK_PID || true
+# 4. Limpieza de procesos y contenedores
+clean:
+	docker-compose down -v
+	@echo "Limpieza profunda completada."

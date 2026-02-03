@@ -1,58 +1,50 @@
-# React + Go Workspace
+# React + Go 
 
-Este proyecto contiene:
+Este proyecto es una infraestructura completa para desarrollo moderno, integrando un backend robusto en Go, un frontend ágil en React y una base de datos automatizada.
 
-- Frontend en React + TypeScript (Vite)
-- Backend en Google Go (API en `backend/main.go`)
-- Pruebas unitarias con Jest (frontend)
-- Pruebas end-to-end con Cypress
-- Colección de Postman para probar el API
-- CI con GitHub Actions (archivo en `.github/workflows/ci.yml`)
+## Tecnologías y Características
+- **Frontend:** React + TypeScript (Vite).
+- **Backend:** Google Go (Standard Library).
+- **Base de Datos:** PostgreSQL 15 (vía Docker).
+- **Infraestructura:** Docker Compose para servicios persistentes.
+- **Calidad:** Jest (Unit), Cypress (E2E) y GitHub Actions (CI).
+- **Seguridad:** Configuración por variables de entorno (.env) y CORS habilitado.
 
-## Requisitos
+##  Requisitos Previos
+- **Docker & Docker Desktop** (Indispensable para la BD).
+- **Go 1.20+**
+- **Node.js 18+**
+- **Make** (Opcional, para atajos).
 
-- Node.js 18+ (idealmente 20)
-- Go 1.20+
+---
 
-## Comandos Frontend
+## Inicio Rápido (First Run)
 
-```bash
-cd frontend
-npm install
-npm run dev         # iniciar Vite (desarrollo)
-npm run build       # construir
-npm run preview     # servir build en 4173
-npm run test        # Jest
-npm run test:e2e    # Cypress (requiere backend en :8080)
-```
+1. **Configurar Entorno:**
+   Crea un archivo `.env` en la raíz del proyecto basándote en los valores del backend
+   ```env
+   DB_HOST=localhost
+   DB_PORT=5435
+   DB_USER=user_admin
+   DB_PASSWORD=secret_password
+   DB_NAME=mi_base_de_datos
+      
+2. **Inicializar Proyecto:** 
+    Si tienes make, ejecuta:
+    ```
+    make init
+    ```
+    Si no
+    ```
+    docker-compose up -d
+    cd backend && go mod tidy
+    cd ../frontend && npm install
+    ```
 
-## Backend Go
-
-```bash
-cd backend
-go run .            # inicia el servidor en :8080 (compila todos los archivos del paquete)
-go test ./...       # ejecuta pruebas
-```
-
-## Makefile (atajos)
-
-```bash
-make backend         # inicia backend en :8080
-make backend-test    # pruebas Go
-make frontend-install # instala deps frontend
-make frontend-dev    # Vite dev server (puerto por defecto 5173)
-make frontend-build  # build frontend
-make frontend-test   # Jest
-make frontend-e2e    # Cypress E2E tests
-make dev             # levanta backend en segundo plano y Vite dev en primer plano
-```
-
-## Postman
-
-Importa `postman/collection.json` en Postman para probar `GET /api/hello`.
-
-## CI (GitHub Actions)
-
-- Ejecuta pruebas de Go y Jest
-- Construye el frontend
-- Corre Cypress contra `vite preview` y el backend
+3. **Atajos con Make**
+    ```
+    make init	Levanta DB y descarga dependencias de ambos mundos.
+    make dev	Inicia Backend y Frontend simultáneamente.
+    make backend	Solo inicia el servidor Go en :8080.
+    make frontend-dev	Solo inicia Vite en :5173.
+    ```

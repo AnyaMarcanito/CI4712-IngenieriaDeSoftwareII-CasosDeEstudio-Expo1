@@ -8,15 +8,36 @@ on:
 jobs:
   backend:
     runs-on: ubuntu-latest
+    # AGREGAMOS LA DB PARA EL BACKEND
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: user_admin
+          POSTGRES_PASSWORD: secret_password
+          POSTGRES_DB: mi_base_de_datos
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.21"
+          go-version: "1.23" # Actualizado a tu version
           cache: true
       - name: Run Go tests
         run: go test ./...
         working-directory: backend
+        env: # Le damos las credenciales al robot
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_USER: user_admin
+          DB_PASSWORD: secret_password
+          DB_NAME: mi_base_de_datos
 
   frontend-unit:
     runs-on: ubuntu-latest
@@ -38,27 +59,39 @@ jobs:
         working-directory: frontend
 
   e2e:
+    needs: [backend, frontend-unit] # Solo corre si los otros pasan
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: user_admin
+          POSTGRES_PASSWORD: secret_password
+          POSTGRES_DB: mi_base_de_datos
+        ports:
+          - 5432:5432
     steps:
       - uses: actions/checkout@v4
-
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.21"
-          cache: true
-
+          go-version: "1.23"
+      
       - name: Start backend server
         run: |
-          nohup bash -c "go run ." </dev/null >/dev/null 2>&1 &
+          nohup go run main.go > /dev/null 2>&1 &
         working-directory: backend
+        env:
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_USER: user_admin
+          DB_PASSWORD: secret_password
+          DB_NAME: mi_base_de_datos
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
 
       - name: Install frontend deps
         run: npm ci
@@ -71,4 +104,5 @@ jobs:
           install: false
           build: npm run build
           start: npm run preview
-          wait-on: "http://localhost:5173,http://localhost:8080/api/hello"
+          # Quitamos el wait-on de la API temporalmente hasta que crees el endpoint /api/hello
+          wait-on: "http://localhost:4173"

@@ -47,3 +47,10 @@ backend/coverage/
 ### Misc
 *.tmp
 *.temp
+**/.env
+.env
+# Visual Studio temporales
+.vs/
+*.sln
+*.suo
+*.user
